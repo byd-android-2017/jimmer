@@ -22,14 +22,14 @@ import java.math.BigDecimal
  * [current: OneToManyTest] -> ManyToManyTest -> RecursiveTest -> TriggerTest
  */
 class OneToManyTest() : AbstractMutationTest() {
-    
+
     /*
      * Noun explanation
      *
      * Short Association: Association object(s) with only id property.
      * Long Association: Association object(s) with non-id properties.
      */
-    
+
     @Test
     fun testAttachChildByShortAssociation() {
 
@@ -58,14 +58,14 @@ class OneToManyTest() : AbstractMutationTest() {
                     "from BOOK_STORE tb_1_ " +
                     "where tb_1_.NAME = ?",
                 "MANNING"
-            ),  
-            
+            ),
+
             // Aggregate does not exist, insert it
             ExecutedStatement(
                 "insert into BOOK_STORE(NAME) values(?)",
                 "MANNING"
-            ),  
-            
+            ),
+
             // Change the foreign key of child object
             ExecutedStatement(
                 "update BOOK set STORE_ID = ? where ID in (?)",
@@ -281,11 +281,7 @@ class OneToManyTest() : AbstractMutationTest() {
 
         jdbc(
             "insert into book(id, name, edition, price, store_id) values(?, ?, ?, ?, ?)",
-            20,
-            "GraphQL in Action",
-            1,
-            BigDecimal(39),
-            1L
+            20, "GraphQL in Action", 1, BigDecimal.valueOf(39), 1L
         )
 
         val ex = Assertions.assertThrows(SaveException::class.java) {

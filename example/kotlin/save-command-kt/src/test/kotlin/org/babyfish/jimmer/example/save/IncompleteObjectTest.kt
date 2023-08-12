@@ -2,12 +2,14 @@ package org.babyfish.jimmer.example.save
 
 import org.babyfish.jimmer.example.save.common.AbstractMutationTest
 import org.babyfish.jimmer.example.save.common.ExecutedStatement
+import org.babyfish.jimmer.example.save.model.Book
 import org.babyfish.jimmer.example.save.model.BookStore
 import org.babyfish.jimmer.example.save.model.by
 import org.babyfish.jimmer.kt.new
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 
 /**
@@ -35,16 +37,16 @@ class IncompleteObjectTest : AbstractMutationTest() {
                     website = null // `website` is specified
                 }
             ) {
-                setMode(SaveMode.UPDATE_ONLY) 
+                setMode(SaveMode.UPDATE_ONLY)
             }
-            
+
         assertExecutedStatements(
 
             // `WEBSITE` is updated to be null
             ExecutedStatement(
                 "update BOOK_STORE " +
-                    "set NAME = ?, WEBSITE = ? " +
-                    "where ID = ?",
+                        "set NAME = ?, WEBSITE = ? " +
+                        "where ID = ?",
                 "O'REILLY+", null, 1L
             )
         )
@@ -76,8 +78,8 @@ class IncompleteObjectTest : AbstractMutationTest() {
             // Unspecified property `website` will not be updated
             ExecutedStatement(
                 "update BOOK_STORE " +
-                    "set NAME = ? " +
-                    "where ID = ?",
+                        "set NAME = ? " +
+                        "where ID = ?",
                 "O'REILLY+", 1L
             )
         )
@@ -97,4 +99,32 @@ class IncompleteObjectTest : AbstractMutationTest() {
 
         Assertions.assertEquals(1, result.totalAffectedRowCount)
     }
+
+    @Test
+    fun testIncompleteObject2() {
+        jdbc(
+            "insert into book_store(id, name, website) values (?, ?, ?)",
+            1L, "O'REILLY", "http://www.oreilly.com")
+        jdbc(
+            "insert into book(id, name, edition, price, store_id) values (?, ?, ?, ?, ?)",
+            20L, "GraphQL in Action", 1, BigDecimal.valueOf(39), 1L)
+
+        val result = sql.update(new(Book::class).by {
+            id = 20L
+            store = null
+        })
+
+        assertExecutedStatements(
+
+            // Unspecified property `website` will not be updated
+            ExecutedStatement(
+                "update book " +
+                        "set store_id = ? " +
+                        "where id = ?",
+                null, 20L
+            )
+        )
+        Assertions.assertEquals(1, result.totalAffectedRowCount)
+    }
+
 }

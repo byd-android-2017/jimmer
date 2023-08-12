@@ -81,11 +81,11 @@ abstract class AbstractMutationTest {
     /**
      * 比较两个SQL语句语义是否相等，忽略格式差异
      */
-    private fun compareSQL(sql1: String?, sql2: String?): Boolean {
+    private fun compareSQL(sql1: String, sql2: String): Boolean {
         return try {
             val stmt1 = CCJSqlParserUtil.parse(sql1)
             val stmt2 = CCJSqlParserUtil.parse(sql2)
-            stmt1.toString() == stmt2.toString()
+            stmt1.toString().equals(stmt2.toString(), ignoreCase = true)
         } catch (e: JSQLParserException) {
             false
         }
@@ -98,7 +98,7 @@ abstract class AbstractMutationTest {
             val actual =  this.executedStatements[i].sql
 
             assertThat(compareSQL(actual, expected))
-                .describedAs("Failed to assert sql of statements[$i]")
+                .describedAs("Failed to assert sql of statements[$i]\nexpected:\n$expected\nactual:\n$actual")
                 .isTrue()
 
             assertThat(this.executedStatements[i].variables)
